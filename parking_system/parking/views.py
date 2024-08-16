@@ -4,12 +4,22 @@
 # from .forms import ParkingImageForm
 # from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
 from .forms import UserRegisterForm
 
 from django.shortcuts import render, redirect
 from .models import Vehicle, ParkingSession, ParkingImage
 from .vision import detect_license_plate
 from .forms import ParkingImageForm
+
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import TemplateView
+
+# class HomePageView(LoginRequiredMixin, TemplateView):
+#     template_name = 'base.html'
+#     login_url = 'login'
+#     redirect_field_name = 'redirect_to'
 
 
 def home(request):
@@ -28,13 +38,22 @@ def upload_image(request):
     return render(request, 'upload_image.html')
 
 
+@login_required(login_url='login')
 def vehicle_list(request):
-    vehicles = Vehicle.objects.all()
+    if request.user.is_staff:
+        vehicles = Vehicle.objects.all()
+    else:
+        vehicles = Vehicle.objects.filter(owner=request.user)
     return render(request, 'vehicle_list.html', {'vehicles': vehicles})
 
 
+@login_required(login_url='login')
 def parking_sessions(request):
-    sessions = ParkingSession.objects.all()
+    if request.user.is_staff:
+        sessions = ParkingSession.objects.all()
+    else:
+        sessions = ParkingSession.objects.filter(vehicle__owner=request.user)
+
     return render(request, 'parking_sessions.html', {'sessions': sessions})
 
 
