@@ -1,3 +1,11 @@
+# from django.shortcuts import render, redirect
+# from .models import Vehicle, ParkingSession, ParkingImage
+# from .vision import detect_license_plate
+# from .forms import ParkingImageForm
+# from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
+from .forms import UserRegisterForm
+
 from django.shortcuts import render, redirect
 from .models import Vehicle, ParkingSession, ParkingImage
 from .vision import detect_license_plate
@@ -28,3 +36,16 @@ def vehicle_list(request):
 def parking_sessions(request):
     sessions = ParkingSession.objects.all()
     return render(request, 'parking_sessions.html', {'sessions': sessions})
+
+
+def register(request):
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Account created for {username}!')
+            return redirect('login')
+    else:
+        form = UserRegisterForm()
+    return render(request, 'register.html', {'form': form})
