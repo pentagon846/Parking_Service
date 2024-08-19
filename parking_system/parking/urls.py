@@ -3,7 +3,7 @@ from django.contrib.auth import views as auth_views
 #from .views import HomePageView, VehicleListView, ParkingSessionListView
 from django.contrib.auth import views as auth_views
 from . import views
-from .views import add_vehicle
+from .views import add_vehicle, export_parking_report_csv
 
 
 urlpatterns = [
@@ -13,4 +13,6 @@ urlpatterns = [
     path('sessions/', views.parking_sessions, name='parking_sessions'),
     path('register/', views.register, name='register'),
     path('add_vehicle/', add_vehicle, name='add_vehicle'),
+    path('export/parking_report/', export_parking_report_csv, name='export_parking_report_csv'),
+
 ]

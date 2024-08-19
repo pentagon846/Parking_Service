@@ -1,11 +1,9 @@
-# from django.shortcuts import render, redirect
-# from .models import Vehicle, ParkingSession, ParkingImage
-# from .vision import detect_license_plate
-# from .forms import ParkingImageForm
-# from django.contrib.auth.forms import UserCreationForm
+import csv
+from decimal import Decimal
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-
+from django.http import HttpResponse
 from .forms import UserRegisterForm, VehicleForm
 
 from django.shortcuts import render, redirect
@@ -60,6 +58,46 @@ def vehicle_list(request):
     else:
         vehicles = Vehicle.objects.filter(owner=request.user)
     return render(request, 'vehicle_list.html', {'vehicles': vehicles})
+
+
+@login_required(login_url='login')
+def export_parking_report_csv(request):
+    response = HttpResponse(content_type='csv')
+    response['Content-Disposition'] = 'attachment; filename="parking_report.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Vehicle', 'Owner', 'Entry time', 'Exit time', 'Total duration', 'Cost'])
+
+    if request.user.is_staff:
+        sessions = ParkingSession.objects.all()
+    else:
+        sessions = ParkingSession.objects.filter(vehicle__owner=request.user)
+
+    for session in sessions:
+        if session.total_duration is not None:
+            duration_in_hours = Decimal(session.total_duration.total_seconds()) / Decimal(3600)
+            rate = session.vehicle.get_parking_rate()
+            cost = duration_in_hours * rate
+
+            writer.writerow([
+                session.vehicle.license_plate,
+                session.vehicle.owner.username,
+                session.entry_time,
+                session.exit_time or "In Progress",
+                session.total_duration,
+                f"{cost:.2f} USD"
+            ])
+        else:
+            writer.writerow([
+                session.vehicle.license_plate,
+                session.vehicle.owner.username,
+                session.entry_time,
+                "In Progress",
+                "In Progress",
+                "In Progress"
+            ])
+
+    return response
 
 
 @login_required(login_url='login')
