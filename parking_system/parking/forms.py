@@ -39,4 +39,5 @@ class UserRegisterForm(UserCreationForm):
 class VehicleForm(forms.ModelForm):
     class Meta:
         model = Vehicle
-        fields = ['license_plate']
+        fields = ['license_plate', 'vehicle_type']
+

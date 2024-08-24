@@ -10,6 +10,7 @@
             <th>Entry Time</th>
             <th>Exit Time</th>
             <th>Total Duration</th>
+            <th>Cost</th>
         </tr>
     </thead>
     <tbody>
@@ -19,6 +20,8 @@
             <td>{{ session.entry_time }}</td>
             <td>{{ session.exit_time|default:"In Progress" }}</td>
             <td>{{ session.total_duration }}</td>
+            <td>{{ session.cost }}</td>
+
         </tr>
         {% endfor %}
     </tbody>
